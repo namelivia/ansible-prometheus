@@ -1,0 +1,168 @@
+---
+- name: Create the dockernetwork
+  docker_network:
+    name: "{{ docker_network_name }}"
+
+- name: Create the prometheus data volumne
+  docker_volume:
+    name: prometheus-data
+
+- name: Create the grafana data volumne
+  docker_volume:
+    name: grafana-data
+
+- name: Create prometheus container
+  docker_container:
+    name: "prometheus"
+    image: "prom/prometheus:v2.15.2"
+    networks:
+      - name: "{{ docker_network_name }}"
+    volumes:
+        - "{{ hostvars[inventory_hostname].working_directory }}prometheus:/etc/prometheus"
+        - prometheus-data:/prometheus
+    restart_policy: "unless-stopped"
+    exposed_ports:
+      - "9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+- name: Create alertmanager container
+  docker_container:
+    name: "alertmanager"
+    image: "prom/alertmanager:v0.20.0"
+    networks:
+      - name: "{{ docker_network_name }}"
+    volumes:
+        - {{ hostvars[inventory_hostname].working_directory }}alertmanager:/etc/alertmanager
+    restart_policy: "unless-stopped"
+    exposed_ports:
+      - "9093"
+
+- name: Create nodeexporter container
+  docker_container:
+    name: "nodeexporter"
+    image: "prom/node-exporter:v0.18.1"
+    networks:
+      - name: "{{ docker_network_name }}"
+    volumes:
+        - /proc:/host/proc:ro
+        - /sys:/host/sys:ro
+        - /:/rootfs:ro
+    command:
+        - '--path.procfs=/host/proc'
+        - '--path.rootfs=/rootfs'
+        - '--path.sysfs=/host/sys'
+        - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart_policy: "unless-stopped"
+    exposed_ports:
+      - "9100"
+
+- name: Create cadvisor container
+  docker_container:
+    name: "cadvisor"
+    image: "gcr.io/google-containers/cadvisor:v0.34.0"
+    networks:
+      - name: "{{ docker_network_name }}"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro 
+    restart_policy: "unless-stopped"
+    exposed_ports:
+      - "8080"
+
+- name: Create grafana container
+  docker_container:
+    name: "grafana"
+    image: "grafana/grafana:6.5.3"
+    networks:
+      - name: "{{ docker_network_name }}"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - {{ hostvars[inventory_hostname].working_directory }}grafana/provisioning:/etc/grafana/provisioning
+    restart_policy: "unless-stopped"
+    exposed_ports:
+      - "3000"
+    env:
+      GF_SECURITY_ADMIN_USER: '{{ grafana_admin_user }}'
+      GF_SECURITY_ADMIN_PASSWORD: '{{ grafana_password }}'
+      GF_USERS_ALLOW_SIGN_UP: false
+      VIRTUAL_HOST: "{{ domain_name }}"
+      LETSENCRYPT_HOST: "{{ domain_name }}"
+      VIRTUAL_PORT: "3000"
+
+- name: Create pushgateway container
+  docker_container:
+    name: "pushgateway"
+    image: "prom/pushgateway:v1.0.1"
+    networks:
+      - name: "{{ docker_network_name }}"
+    restart_policy: "unless-stopped"
+    exposed_ports:
+      - "9091"
+
+- name: Create caddy container
+  docker_container:
+    name: "caddy"
+    image: "stefanprodan/caddy"
+    networks:
+      - name: "{{ docker_network_name }}"
+    restart_policy: "unless-stopped"
+    volumes:
+      - {{ hostvars[inventory_hostname].working_directory }}caddy:/etc/caddy
+    exposed_ports:
+      - "3000"
+      - "9090"
+      - "9093"
+      - "9091"
+    env:
+        ADMIN_USER: '{{ caddy_admin_user }}'
+        ADMIN_PASSWORD: '{{ caddy_password }}'
+
+- name: Copy prometheus config
+  template:
+    src: ../template/prometheus.j2
+    dest: /home/ubuntu/prometheus/prometeus.yml
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
+- name: Copy prometheus alerts config
+  template:
+    src: ../template/prometheus.j2
+    dest: /home/ubuntu/prometheus/alert.rules
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
+- name: Copy alertmanager config
+  template:
+    src: ../templates/alertmanager.j2
+    dest: /home/ubuntu/alertmanager/config.yml
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
+- name: Copy grafana datasources config
+  template:
+    src: ../templates/datasources.j2
+    dest: /home/ubuntu/grafana/provisioning/datasources/datasource.yml
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
+- name: Copy caddy config
+  template:
+    src: ../templates/caddy.2
+    dest: /home/ubuntu/caddy/Caddyfile
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
