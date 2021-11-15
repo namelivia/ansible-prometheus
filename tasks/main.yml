@@ -1,4 +1,15 @@
 ---
+
+- name: 'Check mandatory variables are defined'
+  assert:
+    that:
+      - docker_network_name is defined
+      - domain_name is defined
+      - grafana_admin_user is defined
+      - grafana_password is defined
+      - caddy_admin_user is defined
+      - caddy_password is defined
+
 - name: Create the dockernetwork
   docker_network:
     name: "{{ docker_network_name }}"
