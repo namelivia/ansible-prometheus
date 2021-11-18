@@ -11,7 +11,7 @@ collections:
   - community.docker
 
 roles:
-  - src: https://github.com/namelivia/namelivia.prometheus
+  - src: https://github.com/namelivia/ansible-prometheus
 ```
 
 ## Required variables (TODO: Update these)

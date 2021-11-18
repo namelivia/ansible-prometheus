@@ -1,5 +1,5 @@
 galaxy_info:
-  role_name: namelivia.prometheus
+  role_name: prometheus
   author: José Ignacio Amelivia Santiago <jignacio.amelivia@gmail.com>
   description: Ansible role I use to install and configure prometheus
   license: GPLv2
