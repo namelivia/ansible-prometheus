@@ -29,8 +29,8 @@
     networks:
       - name: "{{ docker_network_name }}"
     volumes:
-        - "{{ hostvars[inventory_hostname].working_directory }}prometheus:/etc/prometheus"
-        - prometheus-data:/prometheus
+      - "{{ hostvars[inventory_hostname].working_directory }}prometheus:/etc/prometheus"
+      - prometheus-data:/prometheus
     restart_policy: "unless-stopped"
     exposed_ports:
       - "9090"
@@ -49,7 +49,7 @@
     networks:
       - name: "{{ docker_network_name }}"
     volumes:
-        - {{ hostvars[inventory_hostname].working_directory }}alertmanager:/etc/alertmanager
+      - "{{ hostvars[inventory_hostname].working_directory }}alertmanager:/etc/alertmanager"
     restart_policy: "unless-stopped"
     exposed_ports:
       - "9093"
@@ -61,14 +61,14 @@
     networks:
       - name: "{{ docker_network_name }}"
     volumes:
-        - /proc:/host/proc:ro
-        - /sys:/host/sys:ro
-        - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
     command:
-        - '--path.procfs=/host/proc'
-        - '--path.rootfs=/rootfs'
-        - '--path.sysfs=/host/sys'
-        - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
     restart_policy: "unless-stopped"
     exposed_ports:
       - "9100"
@@ -84,7 +84,7 @@
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker:/var/lib/docker:ro
-      - /cgroup:/cgroup:ro 
+      - /cgroup:/cgroup:ro
     restart_policy: "unless-stopped"
     exposed_ports:
       - "8080"
@@ -97,7 +97,7 @@
       - name: "{{ docker_network_name }}"
     volumes:
       - grafana_data:/var/lib/grafana
-      - {{ hostvars[inventory_hostname].working_directory }}grafana/provisioning:/etc/grafana/provisioning
+      - "{{ hostvars[inventory_hostname].working_directory }}grafana/provisioning:/etc/grafana/provisioning"
     restart_policy: "unless-stopped"
     exposed_ports:
       - "3000"
@@ -127,19 +127,19 @@
       - name: "{{ docker_network_name }}"
     restart_policy: "unless-stopped"
     volumes:
-      - {{ hostvars[inventory_hostname].working_directory }}caddy:/etc/caddy
+      - "{{ hostvars[inventory_hostname].working_directory }}caddy:/etc/caddy"
     exposed_ports:
       - "3000"
       - "9090"
       - "9093"
       - "9091"
     env:
-        ADMIN_USER: '{{ caddy_admin_user }}'
-        ADMIN_PASSWORD: '{{ caddy_password }}'
+      ADMIN_USER: '{{ caddy_admin_user }}'
+      ADMIN_PASSWORD: '{{ caddy_password }}'
 
 - name: Copy prometheus config
   template:
-    src: ../template/prometheus.j2
+    src: prometheus.j2
     dest: /home/ubuntu/prometheus/prometeus.yml
     owner: ubuntu
     group: ubuntu
@@ -147,7 +147,7 @@
 
 - name: Copy prometheus alerts config
   template:
-    src: ../template/prometheus.j2
+    src: prometheus.j2
     dest: /home/ubuntu/prometheus/alert.rules
     owner: ubuntu
     group: ubuntu
@@ -155,7 +155,7 @@
 
 - name: Copy alertmanager config
   template:
-    src: ../templates/alertmanager.j2
+    src: alertmanager.j2
     dest: /home/ubuntu/alertmanager/config.yml
     owner: ubuntu
     group: ubuntu
@@ -163,7 +163,7 @@
 
 - name: Copy grafana datasources config
   template:
-    src: ../templates/datasources.j2
+    src: datasources.j2
     dest: /home/ubuntu/grafana/provisioning/datasources/datasource.yml
     owner: ubuntu
     group: ubuntu
@@ -171,9 +171,8 @@
 
 - name: Copy caddy config
   template:
-    src: ../templates/caddy.2
+    src: caddy.2
     dest: /home/ubuntu/caddy/Caddyfile
     owner: ubuntu
     group: ubuntu
     mode: '0644'
-
