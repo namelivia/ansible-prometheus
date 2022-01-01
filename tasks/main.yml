@@ -26,6 +26,7 @@
   docker_container:
     name: "prometheus"
     image: "prom/prometheus:v2.15.2"
+    cleanup: true
     networks:
       - name: "{{ docker_network_name }}"
     volumes:
@@ -46,6 +47,7 @@
   docker_container:
     name: "alertmanager"
     image: "prom/alertmanager:v0.20.0"
+    cleanup: true
     networks:
       - name: "{{ docker_network_name }}"
     volumes:
@@ -58,6 +60,7 @@
   docker_container:
     name: "nodeexporter"
     image: "prom/node-exporter:v0.18.1"
+    cleanup: true
     networks:
       - name: "{{ docker_network_name }}"
     volumes:
@@ -77,6 +80,7 @@
   docker_container:
     name: "cadvisor"
     image: "gcr.io/google-containers/cadvisor:v0.34.0"
+    cleanup: true
     networks:
       - name: "{{ docker_network_name }}"
     volumes:
@@ -93,6 +97,7 @@
   docker_container:
     name: "grafana"
     image: "grafana/grafana:6.5.3"
+    cleanup: true
     networks:
       - name: "{{ docker_network_name }}"
     volumes:
@@ -113,6 +118,7 @@
   docker_container:
     name: "pushgateway"
     image: "prom/pushgateway:v1.0.1"
+    cleanup: true
     networks:
       - name: "{{ docker_network_name }}"
     restart_policy: "unless-stopped"
@@ -123,6 +129,7 @@
   docker_container:
     name: "caddy"
     image: "stefanprodan/caddy"
+    cleanup: true
     networks:
       - name: "{{ docker_network_name }}"
     restart_policy: "unless-stopped"
