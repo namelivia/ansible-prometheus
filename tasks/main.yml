@@ -3,6 +3,7 @@
   assert:
     that:
       - application_name is defined
+      - domain_name is defined
       - docker_network_name is defined
       - cloudwatch_region is defined
       - cloudwatch_log_group is defined
@@ -18,7 +19,7 @@
     restart_policy: "always"
     cleanup: true
     exposed_ports:
-      - "9090:9090"
+      - "9090"
     networks:
       - name: "{{ docker_network_name }}"
     log_driver: "awslogs"
@@ -26,3 +27,7 @@
       awslogs-region: "{{ cloudwatch_region }}"
       awslogs-group: "{{ cloudwatch_log_group }}"
       awslogs-stream: "{{ application_name }}"
+    env:
+      VIRTUAL_HOST: "{{ domain_name }}"
+      LETSENCRYPT_HOST: "{{ domain_name }}"
+      VIRTUAL_PORT: "9090"
