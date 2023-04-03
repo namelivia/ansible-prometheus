@@ -7,12 +7,28 @@
       - docker_network_name is defined
       - cloudwatch_region is defined
       - cloudwatch_log_group is defined
+      - prometheus_config_path is defined
 
 - name: Create the dockernetwork
   docker_network:
     name: "{{ docker_network_name }}"
 
-- name: Create database container
+- name: Create the files directory
+  file:
+    path: "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files"
+    state: directory
+    mode: 0700
+
+
+- name: Copy prometheus config
+  copy:
+    src: "{{ prometheus_config_path }}"
+    dest: "{{ hostvars[inventory_hostname].working_directory }}{{application_name}}/files/config.yml"
+    owner: ubuntu
+    group: ubuntu
+    mode: '0644'
+
+- name: Create app container
   docker_container:
     name: "{{ application_name }}"
     image: "prom/prometheus:latest"
@@ -27,6 +43,8 @@
       awslogs-region: "{{ cloudwatch_region }}"
       awslogs-group: "{{ cloudwatch_log_group }}"
       awslogs-stream: "{{ application_name }}"
+    volumes:
+      - "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files/config.yml:/etc/prometheus/prometheus.yml"
     env:
       VIRTUAL_HOST: "{{ domain_name }}"
       LETSENCRYPT_HOST: "{{ domain_name }}"
