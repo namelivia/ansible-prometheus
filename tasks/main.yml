@@ -5,8 +5,7 @@
       - application_name is defined
       - domain_name is defined
       - docker_network_name is defined
-      - cloudwatch_region is defined
-      - cloudwatch_log_group is defined
+      - loki_url is defined
       - prometheus_config_path is defined
 
 - name: Create the dockernetwork
@@ -44,11 +43,10 @@
       - "9090"
     networks:
       - name: "{{ docker_network_name }}"
-    log_driver: "awslogs"
+    log_driver: "loki"
     log_options:
-      awslogs-region: "{{ cloudwatch_region }}"
-      awslogs-group: "{{ cloudwatch_log_group }}"
-      awslogs-stream: "{{ application_name }}"
+      loki-url: "{{ loki_url }}"
+      loki-batch-size: "400"
     volumes:
       - "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files/data:/prometheus"
       - "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files/config.yml:/etc/prometheus/prometheus.yml"
