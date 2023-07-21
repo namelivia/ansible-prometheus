@@ -50,6 +50,7 @@
       - "9090"
     networks:
       - name: "{{ docker_network_name }}"
+      - name: "bridge"
     log_driver: "loki"
     log_options:
       loki-url: "{{ loki_url }}"
@@ -61,3 +62,7 @@
       VIRTUAL_HOST: "{{ domain_name }}"
       LETSENCRYPT_HOST: "{{ domain_name }}"
       VIRTUAL_PORT: "9090"
+
+- name: Restart proxy
+  shell: 
+    cmd: docker restart proxy
