@@ -67,3 +67,7 @@
 - name: Restart proxy
   shell: 
     cmd: docker restart proxy
+
+- name: Restart prometheus
+  shell: 
+    cmd: docker restart prometheus
