@@ -51,6 +51,7 @@
     networks:
       - name: "{{ docker_network_name }}"
       - name: "bridge"
+      - name: "grafana_network"
     log_driver: "loki"
     log_options:
       loki-url: "{{ loki_url }}"
