@@ -7,6 +7,8 @@
       - docker_network_name is defined
       - loki_url is defined
       - prometheus_config_path is defined
+      - uid
+      - gid
 
 - name: Create the dockernetwork
   docker_network:
@@ -43,6 +45,7 @@
     image: "prom/prometheus:latest"
     restart_policy: "always"
     cleanup: true
+    user: "{{ uid }}:{{ gid }}"
     exposed_ports:
       - "9090"
     networks:
