@@ -16,12 +16,16 @@
   file:
     path: "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files"
     state: directory
+    owner: ubuntu
+    group: ubuntu
     mode: 0755
 
 - name: Create the data directory
   file:
     path: "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files/data"
     state: directory
+    owner: ubuntu
+    group: ubuntu
     mode: 0755
 
 
