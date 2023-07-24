@@ -13,3 +13,4 @@ roles:
 ```
 
  - `loki_url` Loki endpoint to send logs.
+ - `host_port` Port to be mapped in the host machine.
