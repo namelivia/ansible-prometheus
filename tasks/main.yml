@@ -63,6 +63,6 @@
 
 # Restart the app container, sometimes needed for upgrades
 - name: Restart prometheus
-  command: docker restart prometheus-app
+  command: docker restart prometheus
   register: restart_prometheus_result
   changed_when: restart_prometheus_result.rc != 0
