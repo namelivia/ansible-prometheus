@@ -20,7 +20,7 @@
     state: directory
     owner: ubuntu
     group: ubuntu
-    mode: 0755
+    mode: "0755"
 
 - name: Create the data directory
   file:
@@ -28,13 +28,13 @@
     state: directory
     owner: ubuntu
     group: ubuntu
-    mode: 0755
+    mode: "0755"
 
 
 - name: Copy prometheus config
   copy:
     src: "{{ prometheus_config_path }}"
-    dest: "{{ hostvars[inventory_hostname].working_directory }}{{application_name}}/files/config.yml"
+    dest: "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files/config.yml"
     owner: ubuntu
     group: ubuntu
     mode: '0644'
@@ -61,6 +61,8 @@
       - "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files/data:/prometheus"
       - "{{ hostvars[inventory_hostname].working_directory }}{{ application_name }}/files/config.yml:/etc/prometheus/prometheus.yml"
 
+# Restart the app container, sometimes needed for upgrades
 - name: Restart prometheus
-  shell: 
-    cmd: docker restart prometheus
+  command: docker restart prometheus-app
+  register: restart_prometheus_result
+  changed_when: restart_prometheus_result.rc != 0
